@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aung Chan Oo - Computer Science Student</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js Library for 3D Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-dark': '#1f2937',
+                        'secondary-dark': '#0f172a',
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--tw-bg-from) 0%, var(--tw-bg-to) 100%);
+        }
+        
+        /* The three.js canvas will be placed here */
+        #three-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-50">
+
+    <!-- Dark Mode & CV Toggle Buttons -->
+    <div class="fixed top-6 right-6 z-50 flex space-x-4">
+        <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md transition-transform hover:scale-105">
+            <svg id="sun-icon" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.363 1.636a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zm-7.072 0a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-2 4.363a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zm-7.072 0a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM4 10a1 1 0 01-1 1H2a1 1 0 110-2h1a1 1 0 011 1zm-1-6a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3 5.414A1 1 0 013 4z" clip-rule="evenodd" fill-rule="evenodd"></path>
+            </svg>
+            <svg id="moon-icon" class="w-6 h-6 text-blue-500 hidden" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.929A6.974 6.974 0 0111.414 19a7.073 7.073 0 01-9.98-9.98c.07-.123.15-.244.234-.363a8 8 0 1016.29 10.662l.255-.248.067-.065z"></path>
+            </svg>
+        </button>
+        <button id="downloadCV" class="bg-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-teal-400 transition-all transform hover:scale-105 shadow-xl">
+            📄 Download CV
+        </button>
+        <button id="Login" onclick="window.location.href='login logout.html'"
+  class="bg-teal-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-teal-400 transition-all transform hover:scale-105 shadow-xl">
+  Login
+</button>
+
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg mx-auto px-4 sm:px-6 py-4 rounded-full mt-4 backdrop-blur-md dark:bg-gray-800/50 bg-gray-200/50 shadow-lg">
+        <div class="flex justify-between items-center text-sm md:text-base">
+            <a href="#home" class="px-3 py-1 rounded-full hover:bg-teal-500 hover:text-white transition-colors">Home</a>
+            <a href="#about" class="px-3 py-1 rounded-full hover:bg-teal-500 hover:text-white transition-colors">About</a>
+            <a href="#education" class="px-3 py-1 rounded-full hover:bg-teal-500 hover:text-white transition-colors">Education</a>
+            <a href="#skills" class="px-3 py-1 rounded-full hover:bg-teal-500 hover:text-white transition-colors">Skills</a>
+            <a href="#contact" class="px-3 py-1 rounded-full hover:bg-teal-500 hover:text-white transition-colors">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section with 3D Background -->
+        <section id="home" class="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
+            <canvas id="three-bg"></canvas>
+            <div class="relative z-10 px-4 max-w-4xl pt-24 pb-12">
+                <div class="w-40 h-40 md:w-48 md:h-48 mx-auto mb-8 rounded-full overflow-hidden shadow-2xl border-4 border-gray-400 dark:border-gray-700 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                    <img src="Gemini_Generated_Image_rj5ntdrj5ntdrj5n.png" alt="Aung Chan Oo" class="w-full h-full object-cover">
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-fuchsia-400 text-transparent bg-clip-text fade-in">
+                    Aung Chan Oo
+                </h1>
+                <p class="text-xl md:text-3xl mb-4 text-gray-600 dark:text-gray-400 font-light fade-in" style="animation-delay: 0.2s;">
+                    Computer Science Student
+                </p>
+                <p class="text-base sm:text-lg mb-8 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto fade-in" style="animation-delay: 0.4s;">
+                    “Driven by a strong interest in web development and AI, with a focus on building intelligent and user-friendly solutions.”
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in" style="animation-delay: 0.6s;">
+                    <a href="#skill" class="bg-teal-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-teal-400 transition-all transform hover:scale-105 shadow-xl">
+                        View My Skill
+                    </a>
+                    <a href="#contact" class="border-2 border-gray-700 text-gray-600 dark:text-gray-300 px-8 py-3 rounded-full font-semibold hover:bg-gray-200 dark:hover:bg-gray-800 transition-all transform hover:scale-105">
+                        Get In Touch
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Me Section -->
+        <section id="about" class="py-20 px-4 bg-gray-100 dark:bg-gray-950">
+            <div class="max-w-6xl mx-auto space-y-12">
+                <h2 class="text-4xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100 fade-in">About Me</h2>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="fade-in">
+                        <h3 class="text-2xl font-semibold mb-6 text-teal-600 dark:text-teal-400">Driven Computer Science Student</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                            I am an NCC Level 4 Diploma in Computing student with a strong passion for web development and artificial intelligence (AI) with machine learning. I enjoy building modern, responsive websites and exploring innovative AI solutions to real-world problems. With a solid foundation in programming, problem-solving, and continuous learning, I am eager to apply my skills in practical projects and contribute to forward-thinking organizations. My goal is to grow as a versatile IT professional, combining creativity in web development with the power of AI and machine learning to make a meaningful impact.
+                        </p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                            I am eager to join your Operation Team as a internship, where I can apply my NCC Level 4 Computing knowledge, gain hands-on industry experience, and contribute to daily operations. This internship will help me strengthen my technical and teamwork skills while preparing for a successful IT career.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="bg-gray-200 dark:bg-gray-800 text-teal-600 dark:text-teal-300 px-4 py-2 rounded-full text-sm font-medium">Problem Solver</span>
+                            <span class="bg-gray-200 dark:bg-gray-800 text-pink-600 dark:text-pink-300 px-4 py-2 rounded-full text-sm font-medium">Team Player</span>
+                            <span class="bg-gray-200 dark:bg-gray-800 text-amber-600 dark:text-amber-300 px-4 py-2 rounded-full text-sm font-medium">Quick Learner</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-200 dark:bg-gray-800 p-8 rounded-2xl shadow-xl fade-in">
+                        <h4 class="text-xl font-semibold mb-6 text-gray-900 dark:text-gray-100">Quick Facts</h4>
+                        <div class="space-y-4 text-gray-600 dark:text-gray-300">
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">🎓</span>Major</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">Computing (NCC L4)</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">📊</span>GPA</span>
+                                <span class="font-medium text-teal-600 dark:text-teal-400">3.7/4.0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">📍</span>College</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">KMD College</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">💼</span>Status</span>
+                                <span class="font-medium text-lime-600 dark:text-lime-400">Seeking Paid Internship</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">💻</span>Skills</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">Web Dev, Python, AI/ML</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">🌐</span>Interests</span>
+                                <span class="font-medium text-teal-600 dark:text-teal-400">Digital Marketing, Social Media Tools</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="flex items-center"><span class="mr-3">⚡</span>Traits</span>
+                                <span class="font-medium text-gray-900 dark:text-gray-100">Quick Learner, Responsible, Team Player</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education" class="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-gray-100 fade-in">Education</h2>
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 card-hover fade-in">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">KMD College</h3>
+                                <p class="text-lg text-teal-600 dark:text-teal-400 font-semibold">NCC Level 4 Diploma in Computing</p>
+                            </div>
+                            <div class="text-right mt-4 md:mt-0">
+                                <p class="text-gray-600 dark:text-gray-400 font-medium">2025 - Present</p>
+                                <p class="text-lg font-bold text-teal-600 dark:text-teal-400">GPA: 3.7/4.0</p>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-8 text-gray-600 dark:text-gray-300">
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Relevant Coursework:</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Data Structures & Algorithms</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Software Engineering</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Database Systems</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Computer Networks</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Machine Learning</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-teal-500 rounded-full mr-3"></span>Web Development</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Certifications:</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>Teenager’s Bright Future Program (MMI College)</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>Basic Building a Successful Business Website (Alison)</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>Introduction to Media and Information (Unesco)</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>Media Relations for Civil Society & Community-based organization (Unesco)</li>
+                                    <li class="flex items-center"><span class="w-2 h-2 bg-lime-500 rounded-full mr-3"></span>Youth Center (YC)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-20 px-4 bg-gray-100 dark:bg-gray-950">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-gray-100 fade-in">Skills</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <div class="fade-in">
+                        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl h-full flex flex-col justify-between">
+                            <h3 class="text-2xl font-semibold mb-8 text-gray-900 dark:text-gray-100">Computer Literacy & Tools</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Microsoft Office Suite</span>
+                                        <span class="text-gray-500 dark:text-gray-400">90%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-teal-500 to-sky-600 h-3 rounded-full" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Social Media Usage</span>
+                                        <span class="text-gray-500 dark:text-gray-400">85%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">AI Tools for Productivity</span>
+                                        <span class="text-gray-500 dark:text-gray-400">80%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-yellow-500 to-amber-500 h-3 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Computer Literacy</span>
+                                        <span class="text-gray-500 dark:text-gray-400">75%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-fuchsia-500 to-pink-500 h-3 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in">
+                        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl h-full flex flex-col justify-between">
+                            <h3 class="text-2xl font-semibold mb-8 text-gray-900 dark:text-gray-100">Professional Skills</h3>
+                            <div class="space-y-6">
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Presentation & Communication</span>
+                                        <span class="text-gray-500 dark:text-gray-400">90%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-teal-500 to-sky-600 h-3 rounded-full" style="width: 90%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Team Collaboration</span>
+                                        <span class="text-gray-500 dark:text-gray-400">85%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Reliability & Work Ethic</span>
+                                        <span class="text-gray-500 dark:text-gray-400">80%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-yellow-500 to-amber-500 h-3 rounded-full" style="width: 80%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between mb-2">
+                                        <span class="font-medium text-gray-600 dark:text-gray-300">Quick Learner</span>
+                                        <span class="text-gray-500 dark:text-gray-400">75%</span>
+                                    </div>
+                                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                                        <div class="skill-progress bg-gradient-to-r from-fuchsia-500 to-pink-500 h-3 rounded-full" style="width: 75%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in">
+                        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl h-full flex flex-col justify-between">
+                            <h3 class="text-2xl font-semibold mb-8 text-gray-900 dark:text-gray-100">Technologies & Tools</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Frontend</h4>
+                                    <ul class="space-y-1 text-gray-600 dark:text-gray-400 text-sm">
+                                        <li>• React.js</li>
+                                        <li>• HTML/CSS</li>
+                                        <li>• Tailwind CSS</li>
+                                        <li>• Vue.js</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Backend</h4>
+                                    <ul class="space-y-1 text-gray-600 dark:text-gray-400 text-sm">
+                                        <li>• Node.js</li>
+                                        <li>• Express.js</li>
+                                        <li>• Django</li>
+                                        <li>• Flask</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Database</h4>
+                                    <ul class="space-y-1 text-gray-600 dark:text-gray-400 text-sm">
+                                        <li>• MongoDB</li>
+                                        <li>• PostgreSQL</li>
+                                        <li>• MySQL</li>
+                                        <li>• Redis</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg shadow-sm">
+                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Tools</h4>
+                                    <ul class="space-y-1 text-gray-600 dark:text-gray-400 text-sm">
+                                        <li>• Git/GitHub</li>
+                                        <li>• Docker</li>
+                                        <li>• AWS</li>
+                                        <li>• Linux</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+            <div class="max-w-7xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-8 text-gray-900 dark:text-gray-100 fade-in">Let's Connect</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 fade-in">
+                    I'm actively seeking entry-level opportunities in web development. Let's discuss how I can contribute to your team!
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 fade-in">
+                    <a href="mailto:smartysolve00@gmail.com" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">📧</div>
+                        <h3 class="font-semibold mb-2">Email</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">smartysolve00@gmail.com</p>
+                    </a>
+                    <a href="tel:+959450556731" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">📞</div>
+                        <h3 class="font-semibold mb-2">Phone</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">+959450556731</p>
+                    </a>
+                    <a href="https://www.linkedin.com/in/aung-chan-oo-097b04377" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">💼</div>
+                        <h3 class="font-semibold mb-2">LinkedIn</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Aung Chan Oo</p>
+                    </a>
+                    <a href="https://github.com/aungchanoonex" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all flex flex-col items-center">
+                        <div class="text-3xl mb-3">🐙</div>
+                        <h3 class="font-semibold mb-2">GitHub</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">aungchanoonex</p>
+                    </a>
+                    <a href="https://t.me/N_E_X_nex" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">✈️</div>
+                        <h3 class="font-semibold mb-2">Telegram</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Omeganex</p>
+                    </a>
+                    <a href="https://www.facebook.com/share/19QYNz2Y2S/?mibextid=wwXIfr" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">📘</div>
+                        <h3 class="font-semibold mb-2">Facebook</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Follow me</p>
+                    </a>
+                    <a href="https://www.instagram.com/omeganex_u?igsh=MXU1YW83NXhpZmtibg%3D%3D&utm_source=qr" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 transform hover:scale-105 shadow-xl transition-all">
+                        <div class="text-3xl mb-3">📸</div>
+                        <h3 class="font-semibold mb-2">Instagram</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">See my posts</p>
+                    </a>
+                    <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white p-6 rounded-2xl shadow-xl">
+                        <div class="text-3xl mb-3">📍</div>
+                        <h3 class="font-semibold mb-2">Address</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Insein RD., Kamayut, Yangon.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <!-- Vlog Section -->
+<section id="vlog" class="py-20 px-4 bg-gray-50 dark:bg-gray-900">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-4xl font-bold text-center mb-16 text-gray-900 dark:text-gray-100 fade-in">
+      🎥 My Vlog
+    </h2>
+
+    <!-- Video Grid -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <!-- Vlog 1 -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all fade-in">
+        <div class="aspect-w-16 aspect-h-9">
+          <iframe
+            class="w-full h-full"
+               <img src="2.jpg" alt="A Day in My GED Student Life">
+            
+          ></iframe>
+        </div>
+        <div class="p-6 text-left">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">A Day in My G10 Student Life</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">
+            At KSLT Pravite School
+          </p>
+        </div>
+      </div>
+
+      <!-- Vlog 2 -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all fade-in" style="animation-delay: 0.2s;">
+        <div class="aspect-w-16 aspect-h-9">
+          <iframe
+            class="w-full h-full"
+           <img src="3.jpg" alt="A Day in My GED Student Life">
+  
+            
+          ></iframe>
+        </div>
+        <div class="p-6 text-left">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">A Day in My GED Student Life</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">
+            At IAT GED Class
+          </p>
+        </div>
+      </div>
+
+      <!-- Vlog 3 -->
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all fade-in" style="animation-delay: 0.4s;">
+        <div class="aspect-w-16 aspect-h-9">
+          <iframe
+            class="w-full h-full"
+            
+        <img src="1.jpg" alt="A Day in My GED Student Life">
+           
+          ></iframe>
+        </div>
+        <div class="p-6 text-left">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">A Day in My Life 2022</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">
+        
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- YouTube Channel Button -->
+    <div class="text-center mt-12 fade-in">
+      <a
+        href="https://www.youtube.com/@Lof2334"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-gradient-to-r from-teal-500 to-fuchsia-500 text-white px-8 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
+      >
+        Visit My YouTube Channel
+       <br>
+ <a
+        href="https://kmdeducation-my.sharepoint.com/:f:/g/personal/acoo1_kmd_edu_mm/Eig_ZsVgK2RCrvMCkfjl714B9cwRW2PxjrRccaPIneXirQ?e=e1fnMx"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-gradient-to-r from-teal-500 to-fuchsia-500 text-white px-8 py-3 rounded-full font-semibold hover:opacity-90 transition-all transform hover:scale-105"
+      >
+        Visit My VLOG Drive
+        
+      </a>
+    </div>
+  </div>
+</section>
+
+
+        
+
+    </main>
+
+    <footer class="bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400 py-8 text-center">
+        <p class="text-sm">© 2025 Aung Chan Oo. Ready to make an impact in tech! 🚀</p>
+    </footer>
+
+    <script>
+        // Dark Mode Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        // Initial theme check on page load
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
+        });
+
+
+        // CV Download functionality
+        document.getElementById('downloadCV').addEventListener('click', function() {
+            // Placeholder for the actual PDF file path.
+            const cvFilePath = 'Modern Minimalist CV Resume (8).pdf';
+            const a = document.createElement('a');
+            a.href = cvFilePath;
+            a.download = 'Aung_Chan_Oo_CV.pdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            const button = this;
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Downloaded!';
+            button.classList.remove('bg-teal-500');
+            button.classList.add('bg-lime-500');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-lime-500');
+                button.classList.add('bg-teal-500');
+            }, 2500);
+        });
+
+
+        // 3D Background with Three.js
+        window.onload = function () {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-bg'), alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Create a custom particle geometry
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            for (let i = 0; i < 500; i++) {
+                vertices.push(
+                    Math.random() * 2000 - 1000, 
+                    Math.random() * 2000 - 1000, 
+                    Math.random() * 2000 - 1000
+                );
+            }
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            
+            // Create particle material with a subtle glow
+            const material = new THREE.PointsMaterial({
+                color: 0x8080ff,
+                size: 2,
+                sizeAttenuation: true,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            // Create the particle system
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            camera.position.z = 500;
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                particles.rotation.x += 0.0001;
+                particles.rotation.y += 0.0002;
+                
+                renderer.render(scene, camera);
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            animate();
+        };
+
+        // Scroll-based fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Animate skill bars when skills section is visible
+        const skillsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const skillBars = entry.target.querySelectorAll('.skill-progress');
+                    skillBars.forEach(bar => {
+                        const width = bar.style.width;
+                        bar.style.width = '0%';
+                        setTimeout(() => {
+                            bar.style.width = width;
+                        }, 300);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const skillsSection = document.getElementById('skills');
+        if (skillsSection) {
+            skillsObserver.observe(skillsSection);
+        }
+
+        setTimeout(() => {
+            document.querySelectorAll('#home .fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('visible');
+                }, index * 200);
+            });
+        }, 500);
+
+        // Remove the QR code element
+        const qrCodeElement = document.querySelector('img[alt="QR Code"]');
+        if (qrCodeElement) {
+            qrCodeElement.parentNode.parentNode.removeChild(qrCodeElement.parentNode);
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+
+<!-- Login -->
+<div id="login" class="bg-white p-8 rounded-xl shadow-lg w-80 text-center">
+  <h2 class="text-2xl font-bold mb-4">Login</h2>
+  <input id="user" type="text" placeholder="Username" class="w-full mb-3 p-2 border rounded">
+  <input id="pass" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded">
+  <p id="msg" class="text-red-600 text-sm mb-2 hidden">Invalid credentials</p>
+  <button id="btnLogin" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Sign In</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dash" class="hidden bg-white p-8 rounded-xl shadow-lg w-80 text-center">
+  <h2 class="text-2xl font-bold mb-2">Welcome, <span id="name"></span></h2>
+  <p class="text-gray-600 mb-4">You are logged in.</p>
+  <button id="btnOut" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">Logout</button>
+</div>
+
+<script>
+const user="admin", pass="12345";
+const login=document.getElementById("login"), dash=document.getElementById("dash");
+const msg=document.getElementById("msg"), name=document.getElementById("name");
+function show(v){login.classList.toggle("hidden",v);dash.classList.toggle("hidden",!v);if(v)name.textContent=localStorage.user;}
+btnLogin.onclick=()=>{let u=user.value, p=pass.value;
+if(u===user&&p===pass){localStorage.logged=true;localStorage.user=u;show(true);}else msg.classList.remove("hidden");};
+btnOut.onclick=()=>{localStorage.clear();show(false);};
+show(localStorage.logged==="true");
+</script>
+
+</body>
+</html>
+
