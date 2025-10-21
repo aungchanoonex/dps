@@ -677,40 +677,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure Login</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Client Login</title>
+    <!-- Load Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-100">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<!-- Login -->
-<div id="login" class="bg-white p-8 rounded-xl shadow-lg w-80 text-center">
-  <h2 class="text-2xl font-bold mb-4">Login</h2>
-  <input id="user" type="text" placeholder="Username" class="w-full mb-3 p-2 border rounded">
-  <input id="pass" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded">
-  <p id="msg" class="text-red-600 text-sm mb-2 hidden">Invalid credentials</p>
-  <button id="btnLogin" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Sign In</button>
-</div>
+    <!-- Main Application Container -->
+    <div id="app-container" class="w-full max-w-lg">
 
-<!-- Dashboard -->
-<div id="dash" class="hidden bg-white p-8 rounded-xl shadow-lg w-80 text-center">
-  <h2 class="text-2xl font-bold mb-2">Welcome, <span id="name"></span></h2>
-  <p class="text-gray-600 mb-4">You are logged in.</p>
-  <button id="btnOut" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">Logout</button>
-</div>
+        <!-- 
+            ====================================================
+            1. LOGIN VIEW 
+            (Initially visible if not logged in)
+            ====================================================
+        -->
+        <section id="login-view" class="hidden">
+            <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-100 transform transition duration-500 hover:shadow-3xl">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+                    Welcome Back
+                </h2>
+                <p class="text-sm text-gray-500 mb-8 text-center">
+                    Please use the dummy credentials: <span class="font-semibold text-indigo-600">admin / 12345</span>
+                </p>
 
-<script>
-const user="admin", pass="12345";
-const login=document.getElementById("login"), dash=document.getElementById("dash");
-const msg=document.getElementById("msg"), name=document.getElementById("name");
-function show(v){login.classList.toggle("hidden",v);dash.classList.toggle("hidden",!v);if(v)name.textContent=localStorage.user;}
-btnLogin.onclick=()=>{let u=user.value, p=pass.value;
-if(u===user&&p===pass){localStorage.logged=true;localStorage.user=u;show(true);}else msg.classList.remove("hidden");};
-btnOut.onclick=()=>{localStorage.clear();show(false);};
-show(localStorage.logged==="true");
-</script>
+                <!-- Login Form -->
+                <form id="login-form">
+                    
+                    <div class="mb-5">
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input type="text" id="username" name="username" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out placeholder-gray-400"
+                               placeholder="Enter your username">
+                    </div>
 
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out placeholder-gray-400"
+                               placeholder="••••••••">
+                    </div>
+                    
+                    <!-- Error Message Display -->
+                    <div id="login-message" class="text-center text-sm font-medium text-red-600 mb-4 hidden"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        Sign In
+                    </button>
+                </form>
+
+            </div>
+        </section>
+
+        <!-- 
+            ====================================================
+            2. DASHBOARD VIEW 
+            (Hidden by default, shown upon successful login)
+            ====================================================
+        -->
+        <section id="dashboard-view" class="hidden">
+            <div class="bg-white p-8 md:p-10 rounded-xl shadow-2xl border border-gray-100 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-indigo-500 mb-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">
+                    Welcome to the Dashboard!
+                </h2>
+                <p class="text-gray-600 mb-8">
+                    You have successfully authenticated and are viewing secure content.
+                </p>
+
+                <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-lg mb-8">
+                    <p class="text-indigo-800 text-sm font-semibold">Session Status:</p>
+                    <p class="text-indigo-700 text-lg font-bold" id="dashboard-username">Loading...</p>
+                </div>
+                
+                <!-- Logout Button -->
+                <button id="logout-button" 
+                        class="w-full max-w-xs mx-auto flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out">
+                    Sign Out
+                </button>
+            </div>
+            
+            <!-- This section simulates content that would be restricted -->
+            <div class="mt-6 p-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg text-sm text-yellow-800">
+                <p class="font-semibold">Simulated Protected Resource</p>
+                <p>This information is only visible because the 'isLoggedIn' key exists in your browser's local storage.</p>
+            </div>
+        </section>
+
+    </div>
+
+
+    <!-- 
+        ====================================================
+        3. JAVASCRIPT LOGIC 
+        (Handles state, views, login, and logout)
+        ====================================================
+    -->
+    <script>
+        // --- 1. CONFIGURATION ---
+        // Define the dummy credentials for demonstration
+        const DUMMY_USERNAME = "admin";
+        const DUMMY_PASSWORD = "12345";
+        // Key used in localStorage to track the authentication state
+        const AUTH_STATE_KEY = 'isLoggedIn'; 
+        const AUTH_USERNAME_KEY = 'loggedInUser';
+
+        // --- 2. DOM ELEMENTS ---
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+        const logoutButton = document.getElementById('logout-button');
+        const loginMessage = document.getElementById('login-message');
+        const dashboardUsernameDisplay = document.getElementById('dashboard-username');
+
+
+        // --- 3. CORE LOGIC FUNCTIONS ---
+
+        /**
+         * Checks the authentication state in localStorage and switches the view.
+         * This function simulates the "access protection" and "redirection."
+         */
+        function checkAuthState() {
+            // Check if the AUTH_STATE_KEY exists in localStorage
+            const isLoggedIn = localStorage.getItem(AUTH_STATE_KEY) === 'true';
+            
+            if (isLoggedIn) {
+                // If logged in, show the dashboard and hide the login form.
+                loginView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                
+                // Update the dashboard with the stored username
+                const username = localStorage.getItem(AUTH_USERNAME_KEY) || 'User';
+                dashboardUsernameDisplay.textContent = username;
+                
+                // For a multi-page app (as requested), this is where you'd redirect
+                // to 'dashboard.html' if this were a separate file.
+                // Since it's a single file, we just show the content.
+                // console.log("User is logged in. Showing Dashboard.");
+
+            } else {
+                // If not logged in, show the login form and hide the dashboard.
+                dashboardView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                
+                // Ensure the form message is cleared when displaying the login view
+                loginMessage.classList.add('hidden');
+                loginMessage.textContent = '';
+                
+                // console.log("User is logged out. Showing Login Form.");
+            }
+        }
+
+        /**
+         * Handles the login attempt from the form submission.
+         * @param {Event} e - The form submit event.
+         */
+        function handleLogin(e) {
+            e.preventDefault(); // Stop the default form submission
+            
+            // Clear previous messages
+            loginMessage.classList.add('hidden');
+
+            // Get values from the form inputs
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+
+            // Simple credential validation
+            if (usernameInput === DUMMY_USERNAME && passwordInput === DUMMY_PASSWORD) {
+                // Login SUCCESS:
+                
+                // 1. Store the successful state in localStorage (required for persistence/protection)
+                localStorage.setItem(AUTH_STATE_KEY, 'true');
+                localStorage.setItem(AUTH_USERNAME_KEY, usernameInput); // Store username for display
+                
+                // 2. Redirect/Switch View
+                checkAuthState(); 
+                
+                // Reset form inputs after successful login
+                loginForm.reset(); 
+
+            } else {
+                // Login FAILURE:
+                loginMessage.textContent = 'Invalid username or password. Please try again.';
+                loginMessage.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Handles the logout action.
+         */
+        function handleLogout() {
+            // 1. Clear the authentication state from localStorage (destroys the session)
+            localStorage.removeItem(AUTH_STATE_KEY);
+            localStorage.removeItem(AUTH_USERNAME_KEY);
+            
+            // 2. Redirect/Switch View (simulates redirecting back to login page)
+            checkAuthState(); 
+        }
+
+        // --- 4. EVENT LISTENERS & INITIALIZATION ---
+
+        // 1. Attach the login handler to the form submission
+        loginForm.addEventListener('submit', handleLogin);
+        
+        // 2. Attach the logout handler to the button click
+        logoutButton.addEventListener('click', handleLogout);
+
+        // 3. Check the initial authentication state when the page loads
+        // This is crucial for maintaining the session across page refreshes or direct URL access
+        window.onload = checkAuthState; 
+
+    </script>
 </body>
 </html>
+
 
